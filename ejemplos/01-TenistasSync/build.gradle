@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+    id 'application' // Para aplicaciones
+    id("io.freefair.lombok") version "8.10.2" // Plugin para integrar Lombok con Gradle
+    id 'jacoco'
+}
+
+group = 'dev.joseluisgs'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClass = 'dev.joseluisgs.Main' // Cambia esto por tu clase principal
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs '-Dfile.encoding=UTF-8'
+}
+
+dependencies {
+    // Lombok en desarrollo
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+
+    // Para JSON usaremos Jackson
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.19.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.2")
+
+    // JDBI para la base de datos
+    implementation("org.jdbi:jdbi3-core:3.49.5") // Core
+    implementation("org.jdbi:jdbi3-sqlobject:3.49.5") // SQL Object para DAO
+
+    // H2 Database
+    implementation("com.h2database:h2:2.3.232")
+
+    // Logger
+    //implementation("org.slf4j:slf4j-simple:2.0.12")
+    implementation('ch.qos.logback:logback-classic:1.5.13')
+    implementation("org.slf4j:slf4j-api:2.0.12")
+
+    // Cache
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
+
+    // Test
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Mockito para las pruebas unitarias
+    testImplementation("org.mockito:mockito-junit-jupiter:5.19.0")
+    testImplementation("org.mockito:mockito-core:5.19.0")
+
+    // Lombok en test
+    testCompileOnly("org.projectlombok:lombok:1.18.32")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
+    }
+}
